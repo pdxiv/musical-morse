@@ -126,7 +126,7 @@ func main() {
 	}
 
 	// Saving the data as a WAV file
-	err := SaveAsWAV("output.wav", 44100, outputData)
+	err := SaveAsWAV("output.wav", sampleRate, outputData)
 	if err != nil {
 		fmt.Println("Error saving WAV file:", err)
 	} else {
