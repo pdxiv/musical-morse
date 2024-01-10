@@ -125,10 +125,6 @@ func main() {
 
 	}
 
-	fmt.Println("DEBUG: length of output data:", len(outputData))
-	fmt.Println("DEBUG: number of dits:", ditCounter)
-	fmt.Println("DEBUG: correct theoretical length of output data:", float64(ditCounter)*ditLength*float64(sampleRate))
-
 	// Saving the data as a WAV file
 	err := SaveAsWAV("output.wav", 44100, outputData)
 	if err != nil {
