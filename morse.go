@@ -81,10 +81,11 @@ func GenerateSineWave(config SineWaveConfig) []int16 {
 
 func main() {
 	inputText := "stop radioactivity"
-	morseCode := textToMorse(inputText)
 	frequency := 1001.0
 	sampleRate := 44100
 	ditLength := 0.05
+
+	morseCode := textToMorse(inputText)
 
 	config := SineWaveConfig{
 		Frequency:  frequency,
