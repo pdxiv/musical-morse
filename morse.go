@@ -109,17 +109,21 @@ func main() {
 		switch runeValue {
 		case '.':
 			outputData = append(outputData, dotSample...)
-			outputData = append(outputData, make([]int16, int(ditLength*float64(sampleRate)))...)
+			expectedLength := int(float64(ditCounter+2) * (ditLength) * float64(sampleRate))
+			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
 			ditCounter += 2
 		case '-':
 			outputData = append(outputData, dashSample...)
-			outputData = append(outputData, make([]int16, int(ditLength*float64(sampleRate)))...)
+			expectedLength := int(float64(ditCounter+4) * (ditLength) * float64(sampleRate))
+			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
 			ditCounter += 4
 		case '_':
-			outputData = append(outputData, make([]int16, int(8*ditLength*float64(sampleRate)))...)
+			expectedLength := int(float64(ditCounter+8) * (ditLength) * float64(sampleRate))
+			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
 			ditCounter += 8
 		case ' ':
-			outputData = append(outputData, make([]int16, int(4*ditLength*float64(sampleRate)))...)
+			expectedLength := int(float64(ditCounter+4) * (ditLength) * float64(sampleRate))
+			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
 			ditCounter += 4
 		}
 
