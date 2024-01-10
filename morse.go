@@ -33,6 +33,9 @@ func textToMorse(text string) string {
 		' ': "_", // This is used to explicitly track the space between words
 	}
 
+	// Add two dummy blank spaces at the end of the more code, to make looping more intuitive
+	text += "  "
+
 	// Converting text to uppercase
 	text = strings.ToUpper(text)
 
@@ -118,9 +121,9 @@ func main() {
 			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
 			ditCounter += 4
 		case '_':
-			expectedLength := int(float64(ditCounter+8) * (ditLength) * float64(sampleRate))
+			expectedLength := int(float64(ditCounter+0) * (ditLength) * float64(sampleRate))
 			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
-			ditCounter += 8
+			ditCounter += 0
 		case ' ':
 			expectedLength := int(float64(ditCounter+4) * (ditLength) * float64(sampleRate))
 			outputData = append(outputData, make([]int16, expectedLength-len(outputData))...)
