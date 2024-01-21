@@ -2,10 +2,10 @@ let audioData;
 let audioContext;
 let audioSource;
 let isAudioPlaying = false;
+let tempo = 120.0; // Initialize tempo with the default value
 
 function generateAudioData(sampleRate) {
-    try {        
-        const tempo = 120.0;
+    try {
         const inputText = "stop radioactivity";
         const morseCode = textToMorse(inputText); // Make sure this function is defined
         audioData = createMorseCodeAudioData(morseCode, sampleRate, tempo); // Make sure this function is defined
@@ -113,7 +113,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const wavBlob = generateWAVBlob(audioData, sampleRate); // Use the selected sampleRate
         download(wavBlob, 'morse_code_audio.wav');
     });
+
     sampleRateSelect.addEventListener('change', function () {
         sampleRate = parseInt(sampleRateSelect.value); // Update sampleRate when a new value is selected
     });
+
+    tempoInput.addEventListener('input', function () {
+        tempo = parseFloat(tempoInput.value); // Update tempo when the input changes
+    });
+
 });
