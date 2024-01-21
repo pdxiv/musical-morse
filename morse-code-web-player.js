@@ -4,12 +4,13 @@ let audioSource;
 let isAudioPlaying = false;
 let tempo = 120.0; // Initialize tempo with the default value
 let inputText = "morse"; // Initialize inputText with the default value
-let note = "A5"; // Initialize inputText with the default value
+let note = "A"; // Initialize inputText with the default value
+let octave = "5"; // Initialize inputText with the default value
 
 function generateAudioData(sampleRate) {
     try {
         const morseCode = textToMorse(inputText);
-        audioData = createMorseCodeAudioData(morseCode, sampleRate, tempo, note);
+        audioData = createMorseCodeAudioData(morseCode, sampleRate, tempo, note + octave);
     } catch (error) {
         console.error("Error:", error.message);
         audioData = null;
@@ -127,6 +128,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     noteSelect.addEventListener('change', function () {
         note = noteSelect.value; // Update sampleRate when a new value is selected        
+    });
+
+    octaveSelect.addEventListener('change', function () {
+        octave = octaveSelect.value; // Update sampleRate when a new value is selected        
     });
 });
 
