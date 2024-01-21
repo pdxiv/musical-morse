@@ -3,99 +3,6 @@
 
 <head>
     <title>Morse Code Player</title>
-    <script>
-        let audioData;
-        let audioContext;
-        let audioSource;
-        let isAudioPlaying = false;
-
-        function generateAudioData() {
-            try {
-                const tempo = 120.0;
-                const inputText = "stop radioactivity";
-                const sampleRate = 44100;
-                const morseCode = textToMorse(inputText);
-                audioData = createMorseCodeAudioData(morseCode, sampleRate, tempo);
-            } catch (error) {
-                console.error("Error:", error.message);
-                audioData = null;
-            }
-        }
-
-        function playAudioData(audioData, sampleRate) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuffer = audioContext.createBuffer(1, audioData.length, sampleRate);
-
-            // Fill the AudioBuffer with the audio data
-            const bufferChannel = audioBuffer.getChannelData(0);
-            for (let i = 0; i < audioData.length; i++) {
-                bufferChannel[i] = audioData[i] / 32767; // Convert from 16-bit to floating point
-            }
-
-            audioSource = audioContext.createBufferSource();
-            audioSource.buffer = audioBuffer;
-            audioSource.connect(audioContext.destination);
-            audioSource.onended = function () {
-                isAudioPlaying = false;
-                document.getElementById('stopButton').disabled = true;
-                document.getElementById('playButton').disabled = false; // Re-enable Play button
-            };
-
-            audioSource.start();
-            isAudioPlaying = true;
-            document.getElementById('stopButton').disabled = false;
-            document.getElementById('playButton').disabled = true; // Disable Play button while playing
-        }
-
-        function stopAudio() {
-            if (isAudioPlaying) {
-                audioSource.stop();
-            }
-        }
-
-        function generateWAVBlob(audioData, sampleRate) {
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-        function download(blob, filename) {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const playButton = document.getElementById('playButton');
-            const stopButton = document.getElementById('stopButton');
-            const downloadButton = document.getElementById('downloadButton');
-
-            playButton.addEventListener('click', function () {
-                generateAudioData();
-                if (audioData) {
-                    playAudioData(audioData, 44100);
-                }
-            });
-
-            stopButton.addEventListener('click', function () {
-                stopAudio();
-            });
-
-            downloadButton.addEventListener('click', function () {
-                if (!audioData) {
-                    generateAudioData();
-                }
-                if (audioData) {
-                    const wavBlob = generateWAVBlob(audioData, 44100);
-                    download(wavBlob, 'morse_code_audio.wav');
-                }
-            });
-        });
-
-    </script>
 </head>
 
 <body>
@@ -103,7 +10,18 @@
     <button id="stopButton" disabled>Stop Playing</button>
     <button id="downloadButton">Download as WAV</button>
 
+    <label for="sampleRateSelect">Sample Rate:</label>
+    <select id="sampleRateSelect">
+        <option value="96000">96000 Hz</option>
+        <option value="48000">48000 Hz</option>
+        <option value="44100" selected>44100 Hz</option>
+        <option value="32000">32000 Hz</option>
+        <option value="16000">16000 Hz</option>
+        <option value="8000">8000 Hz</option>
+    </select>
+
     <script src="morse-code-player.js"></script>
+    <script src="morse-code-web-player.js"></script>
 </body>
 
 </html>
