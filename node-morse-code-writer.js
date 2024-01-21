@@ -85,7 +85,7 @@ function main() {
         const note = "A5";
 
         const morseCode = textToMorse(inputText);
-        const outputData = createMorseCodeAudioData(morseCode, sampleRate, tempo, note);
+        const outputData = createMorseCodeAudioData("sine", morseCode, sampleRate, tempo, note);
 
         const err = saveAsWAV("output.wav", sampleRate, outputData);
 

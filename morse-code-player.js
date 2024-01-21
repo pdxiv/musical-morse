@@ -34,6 +34,15 @@ function textToMorse(text) {
     return morseCode.join(" ");
 }
 
+function generateWave(waveform, frequency, sampleRate, duration, fadeTime) {
+    if (waveform == "sine") {
+        return generateSineWave(frequency, sampleRate, duration, fadeTime);
+    }
+    if (waveform == "square") {
+        return generateSquareWave(frequency, sampleRate, duration, fadeTime);
+    }
+}
+
 function generateSineWave(frequency, sampleRate, duration, fadeTime) {
     const completeCyclesDuration = Math.round(frequency * duration) / frequency;
     const samplesCount = Math.round(sampleRate * completeCyclesDuration);
@@ -67,6 +76,63 @@ function generateSineWave(frequency, sampleRate, duration, fadeTime) {
     }
 
     return sineWave;
+}
+
+// Generate a band-limited square wave using fourier series
+function generateSquareWave(frequency, sampleRate, duration, fadeTime) {
+    const completeCyclesDuration = Math.round(frequency * duration) / frequency;
+    const samplesCount = Math.round(sampleRate * completeCyclesDuration);
+    const floatSineWave = new Array(samplesCount);
+    const squareWave = new Array(samplesCount);
+
+    // const harmonicsCount = 12;
+    const harmonicsCount = ((sampleRate / 2 / frequency) - 1) / 2;
+
+
+    let maxAmplitude = 0;
+
+    for (let i = 0; i < samplesCount; i++) {
+        // Calculate the sine value for this sample
+        let sample = 0;
+        for (let j = 0; j <= harmonicsCount; j++) {
+            let harmonic = j * 2 + 1;
+            let amplitude = 4 / (harmonic * Math.PI);
+            sample += amplitude * Math.sin((2 * Math.PI * frequency * (i * harmonic)) / sampleRate);
+        }
+
+        // Get information about if amplitude is too big
+        if (sample > maxAmplitude) { maxAmplitude = sample; }
+        if (-sample > maxAmplitude) { maxAmplitude = -sample; }
+
+        // Convert it to 16-bit integer range
+        floatSineWave[i] = sample * 32767;
+    }
+
+    // Normalize amplitude
+    for (let i = 0; i < samplesCount; i++) {
+        floatSineWave[i] = floatSineWave[i] / maxAmplitude;
+    }
+
+    const fadeSamples = Math.round(fadeTime * sampleRate);
+    // Fade in sample
+    for (let i = 0; i < fadeSamples; i++) {
+        const fadeInMultiplier = i / fadeSamples;
+        floatSineWave[i] *= fadeInMultiplier;
+    }
+
+    // Fade out sample
+    const fadeoutOffset = floatSineWave.length - fadeSamples;
+    for (let i = 0; i < fadeSamples; i++) {
+        const fadeOutMultiplier = (fadeSamples - i - 1) / fadeSamples;
+        floatSineWave[i + fadeoutOffset] *= fadeOutMultiplier;
+    }
+
+    // Convert to 16-bit integers
+    for (let i = 0; i < samplesCount; i++) {
+        squareWave[i] = Math.round(floatSineWave[i]);
+    }
+
+    return squareWave;
 }
 
 // NoteToFrequency converts a musical note to its frequency.
@@ -137,7 +203,7 @@ function ditLengthForTempo(tempo) {
     return SecondsInMinute / tempo / DitsInBeat;
 }
 
-function createMorseCodeAudioData(morseCode, sampleRate, tempo, note) {
+function createMorseCodeAudioData(wave, morseCode, sampleRate, tempo, note) {
     let outputData = [];
 
     const ditLength = ditLengthForTempo(tempo);
@@ -148,15 +214,15 @@ function createMorseCodeAudioData(morseCode, sampleRate, tempo, note) {
     let sequenceAccumulator = 0;
     let sequenceStep = 0;
 
-    let dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
-    let dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
+    let dotSample = generateWave(wave, sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
+    let dashSample = generateWave(wave, sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
 
     for (const runeValue of morseCode) {
         if (ditCounter >= sequenceAccumulator + sequence[sequenceStep].DitDuration) {
             sequenceAccumulator += sequence[sequenceStep].DitDuration;
             sequenceStep++;
-            dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
-            dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
+            dotSample = generateWave(wave, sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
+            dashSample = generateWave(wave, sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
         }
 
         switch (runeValue) {

@@ -6,11 +6,12 @@ let tempo = 120.0; // Initialize tempo with the default value
 let inputText = "morse"; // Initialize inputText with the default value
 let note = "A"; // Initialize inputText with the default value
 let octave = "5"; // Initialize inputText with the default value
+let wave = "sine"; // Initialize inputText with the default value
 
 function generateAudioData(sampleRate) {
     try {
         const morseCode = textToMorse(inputText);
-        audioData = createMorseCodeAudioData(morseCode, sampleRate, tempo, note + octave);
+        audioData = createMorseCodeAudioData(wave, morseCode, sampleRate, tempo, note + octave);
     } catch (error) {
         console.error("Error:", error.message);
         audioData = null;
@@ -124,6 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     textInput.addEventListener('input', function () {
         inputText = textInput.value; // Update inputText when the text input changes
+    });
+
+    waveSelect.addEventListener('change', function () {
+        wave = waveSelect.value; // Update waveform when a new value is selected
     });
 
     noteSelect.addEventListener('change', function () {
