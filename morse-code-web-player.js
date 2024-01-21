@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     playButton.addEventListener('click', function () {
+        getLimitedTempo();
         generateAudioData(sampleRate);
         playAudioData(audioData, sampleRate); // Use the selected sampleRate
     });
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     downloadButton.addEventListener('click', function () {
+        getLimitedTempo();
         generateAudioData(sampleRate);
         const wavBlob = generateWAVBlob(audioData, sampleRate); // Use the selected sampleRate
         download(wavBlob, 'morse_code_audio.wav');
@@ -117,9 +119,16 @@ document.addEventListener('DOMContentLoaded', function () {
     sampleRateSelect.addEventListener('change', function () {
         sampleRate = parseInt(sampleRateSelect.value); // Update sampleRate when a new value is selected
     });
-
-    tempoInput.addEventListener('input', function () {
-        tempo = parseFloat(tempoInput.value); // Update tempo when the input changes
-    });
-
 });
+
+function getLimitedTempo() {
+    let newTempo = parseFloat(tempoInput.value);
+    if (newTempo < 32) {
+        tempoInput.value = "32";
+        newTempo = 32;
+    } else if (newTempo > 320) {
+        tempoInput.value = "320";
+        newTempo = 320;
+    }
+    tempo = parseFloat(tempoInput.value); // Update tempo when the input changes
+}
