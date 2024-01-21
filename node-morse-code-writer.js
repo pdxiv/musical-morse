@@ -82,9 +82,10 @@ function main() {
         const tempo = 120.0;
         const inputText = "stop radioactivity";
         const sampleRate = 44100;
+        const note = "A5";
 
         const morseCode = textToMorse(inputText);
-        const outputData = createMorseCodeAudioData(morseCode, sampleRate, tempo);
+        const outputData = createMorseCodeAudioData(morseCode, sampleRate, tempo, note);
 
         const err = saveAsWAV("output.wav", sampleRate, outputData);
 

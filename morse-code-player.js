@@ -137,12 +137,11 @@ function ditLengthForTempo(tempo) {
     return SecondsInMinute / tempo / DitsInBeat;
 }
 
-function createMorseCodeAudioData(morseCode, sampleRate, tempo) {
+function createMorseCodeAudioData(morseCode, sampleRate, tempo, note) {
     let outputData = [];
 
-    const ditLength = ditLengthForTempo(tempo); // Assuming this function is defined elsewhere
-    const note = "A5";
-    const frequency = noteToFrequency(note); // Assuming this function is defined elsewhere
+    const ditLength = ditLengthForTempo(tempo);
+    const frequency = noteToFrequency(note);
     const sequence = [{ DitDuration: 999999999, Frequency: frequency }];
 
     let ditCounter = 0;
