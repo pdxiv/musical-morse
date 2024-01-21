@@ -215,64 +215,67 @@ function saveAsWAV(filename, sampleRate, data) {
     }
 }
 
-function main() {
-    try {
-        const tempo = 154.0;
-        const note = "A5";
-        const frequency = noteToFrequency(note);
-        const inputText = "stop radioactivity";
-        const sampleRate = 44100;
-        const ditLength = ditLengthForTempo(tempo);
+function createMorseCodeAudioData(morseCode, sampleRate, tempo) {
+    let outputData = [];
 
-        const morseCode = textToMorse(inputText);
+    const ditLength = ditLengthForTempo(tempo); // Assuming this function is defined elsewhere
+    const note = "A5";
+    const frequency = noteToFrequency(note); // Assuming this function is defined elsewhere
+    const sequence = [{ DitDuration: 999999999, Frequency: frequency }];
 
-        let outputData = [];
+    let ditCounter = 0;
+    let sequenceAccumulator = 0;
+    let sequenceStep = 0;
 
-        const sequence = [{ DitDuration: 999999999, Frequency: 880 }];
+    let dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
+    let dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
 
-        let ditCounter = 0;
-        let sequenceAccumulator = 0;
-        let sequenceStep = 0;
-
-        let dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
-        let dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
-
-        for (const runeValue of morseCode) {
-            if (ditCounter >= sequenceAccumulator + sequence[sequenceStep].DitDuration) {
-                sequenceAccumulator += sequence[sequenceStep].DitDuration;
-                sequenceStep++;
-                // Only generate new dot and dash samples on every new sequencer step
-                dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
-                dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
-            }
-
-            switch (runeValue) {
-                case '.':
-                    outputData = outputData.concat(dotSample);
-                    const expectedLength = Math.floor((ditCounter + 2) * ditLength * sampleRate);
-                    outputData = outputData.concat(new Array(expectedLength - outputData.length).fill(0));
-                    ditCounter += 2;
-                    break;
-                case '-':
-                    outputData = outputData.concat(dashSample);
-                    const expectedLengthDash = Math.floor((ditCounter + 4) * ditLength * sampleRate);
-                    outputData = outputData.concat(new Array(expectedLengthDash - outputData.length).fill(0));
-                    ditCounter += 4;
-                    break;
-                case '_':
-                    const expectedLengthSpace = Math.floor(ditCounter * ditLength * sampleRate);
-                    outputData = outputData.concat(new Array(expectedLengthSpace - outputData.length).fill(0));
-                    ditCounter += 0;
-                    break;
-                case ' ':
-                    const expectedLengthSpaceBetweenWords = Math.floor((ditCounter + 4) * ditLength * sampleRate);
-                    outputData = outputData.concat(new Array(expectedLengthSpaceBetweenWords - outputData.length).fill(0));
-                    ditCounter += 4;
-                    break;
-            }
+    for (const runeValue of morseCode) {
+        if (ditCounter >= sequenceAccumulator + sequence[sequenceStep].DitDuration) {
+            sequenceAccumulator += sequence[sequenceStep].DitDuration;
+            sequenceStep++;
+            dotSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength, 0.005);
+            dashSample = generateSineWave(sequence[sequenceStep].Frequency, sampleRate, ditLength * 3, 0.005);
         }
 
-        const err = saveAsWAV("output.wav", sampleRate, outputData);
+        switch (runeValue) {
+            case '.':
+                outputData = outputData.concat(dotSample);
+                const expectedLength = Math.floor((ditCounter + 2) * ditLength * sampleRate);
+                outputData = outputData.concat(new Array(expectedLength - outputData.length).fill(0));
+                ditCounter += 2;
+                break;
+            case '-':
+                outputData = outputData.concat(dashSample);
+                const expectedLengthDash = Math.floor((ditCounter + 4) * ditLength * sampleRate);
+                outputData = outputData.concat(new Array(expectedLengthDash - outputData.length).fill(0));
+                ditCounter += 4;
+                break;
+            case '_':
+                const expectedLengthSpace = Math.floor(ditCounter * ditLength * sampleRate);
+                outputData = outputData.concat(new Array(expectedLengthSpace - outputData.length).fill(0));
+                ditCounter += 0;
+                break;
+            case ' ':
+                const expectedLengthSpaceBetweenWords = Math.floor((ditCounter + 4) * ditLength * sampleRate);
+                outputData = outputData.concat(new Array(expectedLengthSpaceBetweenWords - outputData.length).fill(0));
+                ditCounter += 4;
+                break;
+        }
+    }
+    return outputData;
+}
+
+function main() {
+    try {
+        const tempo = 120.0;
+        const inputText = "stop radioactivity";
+        const sampleRate = 44100;
+
+        const morseCode = textToMorse(inputText); // Assuming this function is defined elsewhere
+        const outputData = createMorseCodeAudioData(morseCode, sampleRate, tempo);
+
+        const err = saveAsWAV("output.wav", sampleRate, outputData); // Assuming this function is defined elsewhere
 
         if (err) {
             console.error("Error saving WAV file:", err.message);
