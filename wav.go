@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"os"
 )
@@ -45,21 +46,33 @@ func NewWAVHeader(sampleRate int, bitsPerSample int, dataLength int) WAVHeader {
 
 // SaveAsWAV saves the given data as a WAV file
 func SaveAsWAV(filename string, sampleRate int, data []int16) error {
+	// Create a buffer to store the WAV data in memory
+	var buffer bytes.Buffer
+
+	header := NewWAVHeader(sampleRate, 16, len(data))
+
+	// Write the WAV header to the buffer
+	if err := binary.Write(&buffer, binary.LittleEndian, header); err != nil {
+		return err
+	}
+
+	// Write the audio data to the buffer
+	for _, value := range data {
+		if err := binary.Write(&buffer, binary.LittleEndian, value); err != nil {
+			return err
+		}
+	}
+
+	// Create the file and write the buffer contents to it
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	header := NewWAVHeader(sampleRate, 16, len(data))
-	if err := binary.Write(file, binary.LittleEndian, header); err != nil {
+	_, err = buffer.WriteTo(file)
+	if err != nil {
 		return err
-	}
-
-	for _, value := range data {
-		if err := binary.Write(file, binary.LittleEndian, value); err != nil {
-			return err
-		}
 	}
 
 	return nil
